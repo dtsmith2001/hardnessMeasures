@@ -1,0 +1,38 @@
+Code for PRISM
+
+PRISM runs on top of weka (available from http://sourceforge.net/projects/weka/). PRISM expects the data to be in ARFF format.
+
+These classes run the algoriths with and without outlier removal and use weka default parameters:
+
+* gatherData.java
+* gatherDataOutlier.java
+  - gatherDataOutlier.java expects an additional attribute in the ARFF. The first attribute should be a binary (yes/no) attribute that represents if the instance is an ISM or not.
+
+Both gatherData.java and gatherDataOutlier.java are ran using this command:
+
+java -classpath <directoryOfClassFiles>:<directoryOfWeka>/weka.jar gatherData <learningAlgorithm> <ARFF dataFile> <randomSeedForCrossValidation>
+
+The file MyEvaluation.java is used to customize the output. I output each instance ID, the predicted class and the actual class in addition to the overall accuracy.
+
+To determine which instances ar ISMs, the following classes calculate the heuristics:
+
+* k_disagreeing neighbors (KDN)
+    java -cp <DirectoryOfClasses>:<LocationOfWekaJar>:. numNeighbors <DATA_SET> 17 -f > $ds.out
+
+  -OR- you could run this script:
+    getNumNeighbors.sh <DirectoryOfDataSets> <DirectoryOfClasses> <LocationOfWekaJar>
+
+  ** You could similarly create a script to calculate the other heuristic measures **
+
+
+* Disjunct Size (DS)
+  java -cp <LocationOfWekaJar>:bin disjunctSize <DATA_SET> > temp.tmp
+  cat temp.tmp | grep ^[1-9] | awk '{printf("%s", $1); for (i=4; i<=NF; i++){printf(" %s", $i)} printf("\n");}' > $ds.out
+
+* Disjunct Class Percentage (DCP)
+  java -cp <LocationOfWekaJar>:<DirectoryOfClasses> disjunctSize <DATA_SET> -p  > temp.tmp
+  cat temp.tmp | grep ^[1-9] | awk '{printf("%s %s", $1, $2); for (i=4; i<=NF; i++){printf(" %s", $i)} printf("\n");}' > $name.dat
+
+
+* Class Likelihood (CL) and Class Likelihood Difference (CLD)
+  java -cp <LocationOfWekaJar>:<DirectoryOfClasses> nominalOutlierDetectionByClass2 <DATA_SET>
